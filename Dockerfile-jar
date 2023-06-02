@@ -1,0 +1,8 @@
+FROM eclipse-temurin:20-jre-alpine
+# Linux AMD64 - 58 MB compressed
+
+WORKDIR /app
+
+COPY path/to/project.jar /app
+
+ENTRYPOINT ["java", "-jar", "/app/project.jar"]

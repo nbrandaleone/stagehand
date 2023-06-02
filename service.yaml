@@ -1,0 +1,31 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: SERVICE-NAME
+  annotations:
+    run.googleapis.com/launch-stage: BETA
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/container-dependencies: "{app:[git]}"
+        run.googleapis.com/execution-environment: gen1 #or gen2
+    spec:
+      containers:
+      - image: REGION-docker.pkg.dev/PROJECT_ID/run-otel/sample-metrics-app
+        name: app
+        volumeMounts:
+        - mountPath: <path>
+          name: <vol name>
+        ports:
+        - containerPort: CONTAINER_PORT
+        env:
+        - name: "OTEL_EXPORTER_OTLP_ENDPOINT"
+          value: "http://localhost:4317"
+      - image: REGION-docker.pkg.dev/PROJECT_ID/run-otel/otel-collector-metrics
+        name: git
+      volumes:
+      - name: <name>
+        emptyDir:
+          sizeLimit: <size> # Mi or Gi. 500Mi
+          medium: Memory
