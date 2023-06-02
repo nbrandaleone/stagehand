@@ -1,7 +1,10 @@
-FROM clojure:temurin-20-tools-deps-1.11.1.1323-alpine
-# Base image that includes the Clojure CLI tools
-# Linux AMD64 - 230 MB compressed
+FROM eclipse-temurin:20-jre-alpine
+# Linux AMD64 - 58 MB compressed
 
 WORKDIR /app
 
-CMD ["clojure", "-M", "-m", "stagehand.app"]
+COPY ./target/stagehand-1.2.0-standalone.jar .
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "stagehand-1.2.0-standalone.jar"]
