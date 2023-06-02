@@ -1,7 +1,7 @@
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: SERVICE-NAME
+  name: clojure-webserver
   annotations:
     run.googleapis.com/launch-stage: BETA
 spec:
@@ -12,20 +12,47 @@ spec:
         run.googleapis.com/execution-environment: gen1 #or gen2
     spec:
       containers:
-      - image: REGION-docker.pkg.dev/PROJECT_ID/run-otel/sample-metrics-app
-        name: app
-        volumeMounts:
-        - mountPath: <path>
-          name: <vol name>
+      - name: app
+        image: clojure:temurin-20-tools-deps-1.11.1.1323-alpine
         ports:
-        - containerPort: CONTAINER_PORT
-        env:
-        - name: "OTEL_EXPORTER_OTLP_ENDPOINT"
-          value: "http://localhost:4317"
-      - image: REGION-docker.pkg.dev/PROJECT_ID/run-otel/otel-collector-metrics
-        name: git
+        - name: http1
+          containerPort: 8080
+        resources:
+          limits:
+            cpu: '1'
+            memory: 1Gi # G, M, Gi, Mi
+        command:
+        - "clojure"
+        - "-M"
+        - "-m"
+        - "stagehand.app"
+        volumeMounts:
+        - mountPath: /app
+          name: clojure-repo
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          timeoutSeconds: 15
+          periodSeconds: 20
+          failureThreshold: 3
+      - name: git
+        image: docker.io/alpine/git
+        command:
+        - "git"
+        - "clone"
+        - "https://github.com/nbrandaleone/stagehand.git"
+        - "/app"
+        resources:
+          limits:
+            cpu: 250m
+            memory: 256Mi
+        volumeMounts:
+        - mountPath: /app
+          name: clojure-repo
       volumes:
-      - name: <name>
+      - name: clojure-repo
         emptyDir:
-          sizeLimit: <size> # Mi or Gi. 500Mi
+          sizeLimit: 100Mi # Mi or Gi. 500Mi
           medium: Memory

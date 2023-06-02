@@ -7,7 +7,9 @@
   (:require [ring.adapter.jetty :as jetty]
             [clojure.pprint :refer [pprint]]
             [taoensso.timbre :as timbre
-             :refer [log debug info warn error fatal]]))
+             :refer [log debug info warn error fatal]])
+  (:gen-class)) ; instructions to generate bytecode for java class
+                ; from this namespace
 
 (info "Logging is working!")
 
